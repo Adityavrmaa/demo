@@ -52,7 +52,7 @@
 
     async function startWebcam() {
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             videoElement.srcObject = stream;
         } catch (error) {
             console.error('Error accessing webcam:', error);
