@@ -1,105 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebcamJS Image Capture</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
-</head>
+    <title>Webcam Application</title>
+    <style>
+        #videoContainer {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
 
+        #videoElement {
+            width: 100%;
+            max-width: 640px;
+        }
+
+        #controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #imagePreview {
+            width: 100%;
+            max-width: 640px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
 <body>
 
-    <script>
-        Webcam.set({
-            width: 320,
-            height: 240,
-            image_format: 'jpeg',
-            jpeg_quality: 90
-        });
+<div id="controls">
+    <button onclick="startWebcam()">Start Webcam</button>
+    <button onclick="stopWebcam()">Stop Webcam</button>
+    <button onclick="switchCamera()">Switch Camera</button>
+    <button onclick="captureImage()">Capture Image</button>
+    <button onclick="downloadImage()">Download Image</button>
+    <input type="file" accept="image/*" onchange="uploadImage(event)">
+</div>
 
-        let isCapturing = false;
-        let videoStream;
-        const videoPreview = document.getElementById('my-camera');
-        const buttonStartCapture = document.getElementById('start-capture');
-        const buttonStopCapture = document.getElementById('stop-capture');
-        const buttonCaptureImage = document.getElementById('capture-image');
-        const buttonDownloadImage = document.getElementById('download-image');
+<div id="videoContainer">
+    <video id="videoElement" autoplay playsinline muted></video>
+</div>
 
-        async function startCapture() {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+<img id="imagePreview" alt="Captured Image">
 
-            const constraints = {
-                video: {
-                    facingMode: isMobile ? "environment" : "user",
-                },
-            };
+<script>
+    let videoElement = document.getElementById('videoElement');
+    let imagePreview = document.getElementById('imagePreview');
+    let stream;
 
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-                videoPreview.srcObject = videoStream;
-                disabledButtons(false);
-            } catch (error) {
-                console.error('Error accessing webcam:', error);
-                disabledButtons(true);
-            }
+    async function startWebcam() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+            videoElement.srcObject = stream;
+        } catch (error) {
+            console.error('Error accessing webcam:', error);
         }
+    }
 
-        function stopCapture() {
-            if (videoStream) {
-                const tracks = videoStream.getTracks();
-                tracks.forEach(track => track.stop());
-                videoPreview.srcObject = null;
-                disabledButtons(true);
-            }
+    function stopWebcam() {
+        if (stream) {
+            let tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+            videoElement.srcObject = null;
         }
+    }
 
-        function takeScreenshot() {
-            if (videoStream) {
-                const canvas = document.createElement('canvas');
-                canvas.width = videoPreview.videoWidth;
-                canvas.height = videoPreview.videoHeight;
-                const context = canvas.getContext('2d');
-                context.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
-
-                const dataURI = canvas.toDataURL('image/jpeg');
-                document.getElementById('captured-image').src = dataURI;
-            } else {
-                alert("Please start capturing first!");
-            }
+    async function switchCamera() {
+        if (stream) {
+            stopWebcam();
+            await startWebcam();
         }
+    }
 
-        function startDownload() {
-            takeScreenshot(); // Capture image before download
-            const dataURI = document.getElementById('captured-image').src;
+    function captureImage() {
+        let canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        let context = canvas.getContext('2d');
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        imagePreview.src = canvas.toDataURL('image/png');
+    }
 
+    function downloadImage() {
+        if (imagePreview.src) {
             let a = document.createElement('a');
-            a.href = dataURI;
-            a.download = 'captured_image.jpg';
+            a.href = imagePreview.src;
+            a.download = 'captured_image.png';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        } else {
+            alert('No image to download. Capture an image first.');
         }
+    }
 
-        function disabledButtons(disabled) {
-            buttonStartCapture.disabled = !disabled;
-            buttonStopCapture.disabled = disabled;
-            buttonCaptureImage.disabled = disabled;
-            buttonDownloadImage.disabled = disabled;
+    function uploadImage(event) {
+        let file = event.target.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
-    </script>
-
-    <div>
-        <video id="my-camera" autoplay playsinline></video>
-        <br>
-        <button id="start-capture" onclick="startCapture()">Start Capture</button>
-        <button id="stop-capture" onclick="stopCapture()" disabled>Stop Capture</button>
-        <button id="capture-image" onclick="takeScreenshot()" disabled>Capture Image</button>
-        <button id="download-image" onclick="startDownload()" disabled>Download Image</button>
-        <br>
-        <img id="captured-image" alt="Captured Image">
-    </div>
+    }
+</script>
 
 </body>
-
 </html>
