@@ -1,33 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="./styles.css">
+    <title>WebcamJS Image Capture</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
 </head>
-
 <body>
 
+<script>
+    // Initialize WebcamJS
+    Webcam.set({
+        width: 320,
+        height: 240,
+        image_format: 'jpeg',
+        jpeg_quality: 90
+    });
 
-    <!-- image show  -->
-    <video autoplay="true" id="video-preview"></video>
+    let isCapturing = false;
 
-    <!-- button  -->
-    <div class="buttons">
-        <button id="startCam" onclick="startCam()">start</button>
-        <button id="stopCam" onclick="stopCam()">stop</button>
-        <button id="button-screenshot">Take Picture</button>
-        <button id="button-download">Download</button>
-    </div>
+    function startCapture() {
+        Webcam.attach('#my-camera');
+        isCapturing = true;
+    }
 
-    <!-- preview image  -->
-    <img src="https://assets.codepen.io/907368/demo.png" id="screenshot" alt="" />
+    function stopCapture() {
+        Webcam.reset();
+        isCapturing = false;
+    }
+
+    function captureImage() {
+        if (isCapturing) {
+            Webcam.snap(function(data_uri) {
+                // Display the captured image
+                document.getElementById('captured-image').src = data_uri;
+            });
+        } else {
+            alert("Please start capturing first!");
+        }
+    }
+
+    function downloadImage() {
+        if (isCapturing) {
+            alert("Please stop capturing before downloading!");
+        } else {
+            // Download the captured image
+            Webcam.snap(function(data_uri) {
+                let a = document.createElement('a');
+                a.href = data_uri;
+                a.download = 'captured_image.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+    }
+</script>
+
+<div id="my-camera"></div>
+<button onclick="startCapture()">Start Capture</button>
+<button onclick="stopCapture()">Stop Capture</button>
+<button onclick="captureImage()">Capture Image</button>
+<button onclick="downloadImage()">Download Image</button>
+<img id="captured-image" alt="Captured Image">
 
 </body>
-
-<script async src="./script.js"></script>
-
 </html>
