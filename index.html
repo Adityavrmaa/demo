@@ -14,7 +14,7 @@
         width: 320,
         height: 240,
         image_format: 'jpeg',
-        jpeg_quality: 90
+        jpeg_quality: 100
     });
 
     let isCapturing = false;
@@ -41,28 +41,43 @@
     }
 
     function downloadImage() {
-        if (isCapturing) {
-            alert("Please stop capturing before downloading!");
-        } else {
-            // Download the captured image
-            Webcam.snap(function(data_uri) {
-                let a = document.createElement('a');
-                a.href = data_uri;
-                a.download = 'captured_image.jpg';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-        }
-    }
-</script>
+    if (isCapturing) {
+        alert("Please stop capturing before downloading!");
+    } else {
+        Webcam.snap(function(data_uri) {
+            // Convert data URI to Blob
+            const byteString = atob(data_uri.split(',')[1]);
+            const mimeString = data_uri.split(',')[0].split(':')[1].split(';')[0];
+            const arrayBuffer = new ArrayBuffer(byteString.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
 
+            for (let i = 0; i < byteString.length; i++) {
+                uint8Array[i] = byteString.charCodeAt(i);
+            }
+
+            const blob = new Blob([arrayBuffer], { type: mimeString });
+
+            // Create download link
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'captured_image.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    }
+}
+
+</script>
+<div class="main" style="width: 100%;text-align: -webkit-center;">
+    <div style="width: 100%;text-align: -webkit-center;">
 <div id="my-camera"></div>
+</div>
 <button onclick="startCapture()">Start Capture</button>
 <button onclick="stopCapture()">Stop Capture</button>
 <button onclick="captureImage()">Capture Image</button>
 <button onclick="downloadImage()">Download Image</button>
-<img id="captured-image" alt="Captured Image">
-
+<img id="captured-image" alt="">
+</div>
 </body>
 </html>
