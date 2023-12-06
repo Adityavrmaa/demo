@@ -1,76 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebcamJS Image Capture</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
 </head>
+
 <body>
 
-<script>
-    Webcam.set({
-        width: 320,
-        height: 240,
-        image_format: 'jpeg',
-        jpeg_quality: 90
-    });
+    <script>
+        Webcam.set({
+            width: 320,
+            height: 240,
+            image_format: 'jpeg',
+            jpeg_quality: 90
+        });
 
-    let isCapturing = false;
+        let isCapturing = false;
+        let videoStream;
+        const videoPreview = document.getElementById('my-camera');
+        const buttonStartCapture = document.getElementById('start-capture');
+        const buttonStopCapture = document.getElementById('stop-capture');
+        const buttonCaptureImage = document.getElementById('capture-image');
+        const buttonDownloadImage = document.getElementById('download-image');
 
-    function startCapture() {
-        // Constraints to prefer the back camera on mobile devices
-        const constraints = {
-            video: { facingMode: 'environment' }
-        };
+        async function startCapture() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-        navigator.mediaDevices.getUserMedia(constraints)
-            .then(mediaStream => {
-                Webcam.attach('#my-camera', { video: mediaStream });
-                isCapturing = true;
-            })
-            .catch(error => {
-                console.error('Error accessing camera devices:', error);
-            });
-    }
+            const constraints = {
+                video: {
+                    facingMode: isMobile ? "environment" : "user",
+                },
+            };
 
-    function stopCapture() {
-        Webcam.reset();
-        isCapturing = false;
-    }
-
-    function captureImage() {
-        if (isCapturing) {
-            Webcam.snap(function(data_uri) {
-                document.getElementById('captured-image').src = data_uri;
-            });
-        } else {
-            alert("Please start capturing first!");
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoPreview.srcObject = videoStream;
+                disabledButtons(false);
+            } catch (error) {
+                console.error('Error accessing webcam:', error);
+                disabledButtons(true);
+            }
         }
-    }
 
-    function downloadImage() {
-        if (isCapturing) {
-            alert("Please stop capturing before downloading!");
-        } else {
-            Webcam.snap(function(data_uri) {
-                const a = document.createElement('a');
-                a.href = data_uri;
-                a.download = 'captured_image.jpg';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
+        function stopCapture() {
+            if (videoStream) {
+                const tracks = videoStream.getTracks();
+                tracks.forEach(track => track.stop());
+                videoPreview.srcObject = null;
+                disabledButtons(true);
+            }
         }
-    }
-</script>
 
-<div id="my-camera"></div>
-<button onclick="startCapture()">Start Capture</button>
-<button onclick="stopCapture()">Stop Capture</button>
-<button onclick="captureImage()">Capture Image</button>
-<button onclick="downloadImage()">Download Image</button>
-<img id="captured-image" alt="Captured Image">
+        function takeScreenshot() {
+            if (videoStream) {
+                const canvas = document.createElement('canvas');
+                canvas.width = videoPreview.videoWidth;
+                canvas.height = videoPreview.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
+
+                const dataURI = canvas.toDataURL('image/jpeg');
+                document.getElementById('captured-image').src = dataURI;
+            } else {
+                alert("Please start capturing first!");
+            }
+        }
+
+        function startDownload() {
+            takeScreenshot(); // Capture image before download
+            const dataURI = document.getElementById('captured-image').src;
+
+            let a = document.createElement('a');
+            a.href = dataURI;
+            a.download = 'captured_image.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function disabledButtons(disabled) {
+            buttonStartCapture.disabled = !disabled;
+            buttonStopCapture.disabled = disabled;
+            buttonCaptureImage.disabled = disabled;
+            buttonDownloadImage.disabled = disabled;
+        }
+    </script>
+
+    <div>
+        <video id="my-camera" autoplay playsinline></video>
+        <br>
+        <button id="start-capture" onclick="startCapture()">Start Capture</button>
+        <button id="stop-capture" onclick="stopCapture()" disabled>Stop Capture</button>
+        <button id="capture-image" onclick="takeScreenshot()" disabled>Capture Image</button>
+        <button id="download-image" onclick="startDownload()" disabled>Download Image</button>
+        <br>
+        <img id="captured-image" alt="Captured Image">
+    </div>
 
 </body>
+
 </html>
