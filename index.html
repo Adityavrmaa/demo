@@ -17,17 +17,16 @@
     });
 
     let isCapturing = false;
-    let currentCamera = 'environment'; // 'user' for front camera, 'environment' for back camera
 
     function startCapture() {
-        // Enumerate devices and choose the desired camera
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                const cameras = devices.filter(device => device.kind === 'videoinput');
-                if (cameras.length > 1) {
-                    currentCamera = (currentCamera === 'user') ? 'environment' : 'user';
-                }
-                Webcam.attach('#my-camera', { deviceId: { exact: currentCamera } });
+        // Constraints to prefer the back camera on mobile devices
+        const constraints = {
+            video: { facingMode: 'environment' }
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(mediaStream => {
+                Webcam.attach('#my-camera', { video: mediaStream });
                 isCapturing = true;
             })
             .catch(error => {
@@ -55,7 +54,7 @@
             alert("Please stop capturing before downloading!");
         } else {
             Webcam.snap(function(data_uri) {
-                let a = document.createElement('a');
+                const a = document.createElement('a');
                 a.href = data_uri;
                 a.download = 'captured_image.jpg';
                 document.body.appendChild(a);
