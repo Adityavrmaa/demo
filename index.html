@@ -5,11 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Handling</title>
 </head>
+
+<style>
+    body{
+        display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+    }
+       #openCameraButton {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #4CAF50;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #cameraFileInput {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Optional: Style the input's label for better appearance */
+        #cameraFileInputLabel {
+            display: block;
+            text-align: center;
+            padding: 10px;
+        }
+</style>
 <body>
 
-<input id="cameraFileInput" type="file" accept="image/*" capture="environment" onchange="handleImageSelection(event)" />
+    <label for="cameraFileInput" id="openCameraButton">
+        <input id="cameraFileInput" type="file" accept="image/*" capture="environment" onchange="handleImageSelection(event)" />
+        Open Camera
+    </label>
+<!-- <input id="cameraFileInput" type="file" accept="image/*" capture="environment" onchange="handleImageSelection(event)" /> -->
 <div id="imagePreviewContainer"></div>
-<button id="downloadButton" onclick="downloadImage()" disabled>Download Image</button>
+<button id="downloadButton" onclick="downloadImage()" disabled>upload image</button>
 
 <script>
     let selectedImagePath = '';
