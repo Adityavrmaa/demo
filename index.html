@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,85 +29,81 @@
         }
     </style>
 </head>
+
 <body>
+    <div class="main_container" style="text-align: center;">
+        <div id="controls">
+            <button onclick="startWebcam()">Start Webcam</button>
+            <button onclick="stopWebcam()">Stop Webcam</button>
+            <!-- <button onclick="switchCamera()">Switch Camera</button> -->
+            <button onclick="downloadImage()">Download Image</button>
+        </div>
 
-<div id="controls">
-    <button onclick="startWebcam()">Start Webcam</button>
-    <button onclick="stopWebcam()">Stop Webcam</button>
-    <button onclick="switchCamera()">Switch Camera</button>
-    <button onclick="captureImage()">Capture Image</button>
-    <button onclick="downloadImage()">Download Image</button>
-    <input type="file" accept="image/*" onchange="uploadImage(event)">
-</div>
+        <div id="videoContainer">
+            <video id="videoElement" autoplay playsinline muted></video>
+        </div>
+        <button onclick="captureImage()" class="my-3">Capture Image</button>
 
-<div id="videoContainer">
-    <video id="videoElement" autoplay playsinline muted></video>
-</div>
+        <img id="imagePreview" alt="">
 
-<img id="imagePreview" alt="Captured Image">
+        <input id="cameraFileInput" type="file" accept="image/*" capture="environment" />
+    </div>
+    <script>
+        let videoElement = document.getElementById('videoElement');
+        let imagePreview = document.getElementById('imagePreview');
+        let stream;
 
-<script>
-    let videoElement = document.getElementById('videoElement');
-    let imagePreview = document.getElementById('imagePreview');
-    let stream;
-
-    async function startWebcam() {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            videoElement.srcObject = stream;
-        } catch (error) {
-            console.error('Error accessing webcam:', error);
+        async function startWebcam() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                videoElement.srcObject = stream;
+            } catch (error) {
+                console.error('Error accessing webcam:', error);
+            }
         }
-    }
 
-    function stopWebcam() {
-        if (stream) {
-            let tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
-            videoElement.srcObject = null;
+
+
+        function stopWebcam() {
+            if (stream) {
+                let tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                videoElement.srcObject = null;
+            }
         }
-    }
 
-    async function switchCamera() {
-        if (stream) {
-            stopWebcam();
-            await startWebcam();
+        async function switchCamera() {
+            if (stream) {
+                stopWebcam();
+                await startWebcam();
+            }
         }
-    }
 
-    function captureImage() {
-        let canvas = document.createElement('canvas');
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        let context = canvas.getContext('2d');
-        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-        imagePreview.src = canvas.toDataURL('image/png');
-    }
-
-    function downloadImage() {
-        if (imagePreview.src) {
-            let a = document.createElement('a');
-            a.href = imagePreview.src;
-            a.download = 'captured_image.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        } else {
-            alert('No image to download. Capture an image first.');
+        function captureImage() {
+            let canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            let context = canvas.getContext('2d');
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            imagePreview.src = canvas.toDataURL('image/png');
         }
-    }
 
-    function uploadImage(event) {
-        let file = event.target.files[0];
-        if (file) {
-            let reader = new FileReader();
-            reader.onload = function (e) {
-                imagePreview.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        function downloadImage() {
+            if (imagePreview.src) {
+                let a = document.createElement('a');
+                a.href = imagePreview.src;
+                a.download = 'captured_image.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                alert('No image to download. Capture an image first.');
+            }
         }
-    }
-</script>
+
+
+    </script>
 
 </body>
+
 </html>
