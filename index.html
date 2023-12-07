@@ -1,109 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webcam Application</title>
-    <style>
-        #videoContainer {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        #videoElement {
-            width: 100%;
-            max-width: 640px;
-        }
-
-        #controls {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        #imagePreview {
-            width: 100%;
-            max-width: 640px;
-            margin-top: 20px;
-        }
-    </style>
+    <title>Image Handling</title>
 </head>
-
 <body>
-    <div class="main_container" style="text-align: center;">
-        <div id="controls">
-            <button onclick="startWebcam()">Start Webcam</button>
-            <button onclick="stopWebcam()">Stop Webcam</button>
-            <!-- <button onclick="switchCamera()">Switch Camera</button> -->
-            <button onclick="downloadImage()">Download Image</button>
-        </div>
 
-        <div id="videoContainer">
-            <video id="videoElement" autoplay playsinline muted></video>
-        </div>
-        <button onclick="captureImage()" class="my-3">Capture Image</button>
+<input id="cameraFileInput" type="file" accept="image/*" capture="environment" onchange="handleImageSelection(event)" />
 
-        <img id="imagePreview" alt="">
+<div id="imagePreviewContainer"></div>
 
-        <input id="cameraFileInput" type="file" accept="image/*" capture="environment" />
-    </div>
-    <script>
-        let videoElement = document.getElementById('videoElement');
-        let imagePreview = document.getElementById('imagePreview');
-        let stream;
+<script>
+    function handleImageSelection(event) {
+        const fileInput = event.target;
+        const selectedFile = fileInput.files[0];
 
-        async function startWebcam() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                videoElement.srcObject = stream;
-            } catch (error) {
-                console.error('Error accessing webcam:', error);
-            }
+        if (selectedFile) {
+            // Get the image source path
+            const imagePath = URL.createObjectURL(selectedFile);
+
+            // Display image preview
+            displayImagePreview(imagePath);
+
+            // Provide an option to download the image
+            provideDownloadLink(imagePath);
         }
+    }
 
+    function displayImagePreview(imagePath) {
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        imagePreviewContainer.innerHTML = '';
 
+        const imageElement = document.createElement('img');
+        imageElement.src = imagePath;
+        imageElement.alt = 'Selected Image';
+        imageElement.style.maxWidth = '100%';
+        imagePreviewContainer.appendChild(imageElement);
+    }
 
-        function stopWebcam() {
-            if (stream) {
-                let tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
-                videoElement.srcObject = null;
-            }
-        }
+    function provideDownloadLink(imagePath) {
+        const downloadLinkContainer = document.getElementById('downloadLinkContainer');
+        downloadLinkContainer.innerHTML = '';
 
-        async function switchCamera() {
-            if (stream) {
-                stopWebcam();
-                await startWebcam();
-            }
-        }
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imagePath;
+        downloadLink.download = 'selected_image.png'; // You can customize the download filename
+        downloadLink.textContent = 'Download Image';
 
-        function captureImage() {
-            let canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            let context = canvas.getContext('2d');
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            imagePreview.src = canvas.toDataURL('image/png');
-        }
-
-        function downloadImage() {
-            if (imagePreview.src) {
-                let a = document.createElement('a');
-                a.href = imagePreview.src;
-                a.download = 'captured_image.png';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            } else {
-                alert('No image to download. Capture an image first.');
-            }
-        }
-
-
-    </script>
+        downloadLinkContainer.appendChild(downloadLink);
+    }
+</script>
 
 </body>
-
 </html>
