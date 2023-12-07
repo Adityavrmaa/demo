@@ -3,12 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Handling</title>
+    <title>Camera Design</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        #cameraContainer {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            border: 10px solid #333;
+            border-radius: 15px;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        #cameraFileInput {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        #downloadButton {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #imagePreviewContainer img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body>
 
-<input id="cameraFileInput" type="file" accept="image/*" capture="environment" onchange="handleImageSelection(event)" />
-<div id="imagePreviewContainer"></div>
+<div id="cameraContainer">
+    <input id="cameraFileInput" type="file" accept="image/*" capture="environment" onchange="handleImageSelection(event)" />
+    <div id="imagePreviewContainer"></div>
+</div>
 <button id="downloadButton" onclick="downloadImage()" disabled>Download Image</button>
 
 <script>
@@ -37,7 +87,6 @@
         const imageElement = document.createElement('img');
         imageElement.src = imagePath;
         imageElement.alt = 'Selected Image';
-        imageElement.style.maxWidth = '100%';
         imagePreviewContainer.appendChild(imageElement);
     }
 
