@@ -8,23 +8,25 @@
 <body>
 
 <input id="cameraFileInput" type="file" accept="image/*" capture="environment" onchange="handleImageSelection(event)" />
-
 <div id="imagePreviewContainer"></div>
+<button id="downloadButton" onclick="downloadImage()" disabled>Download Image</button>
 
 <script>
+    let selectedImagePath = '';
+
     function handleImageSelection(event) {
         const fileInput = event.target;
         const selectedFile = fileInput.files[0];
 
         if (selectedFile) {
             // Get the image source path
-            const imagePath = URL.createObjectURL(selectedFile);
+            selectedImagePath = URL.createObjectURL(selectedFile);
 
             // Display image preview
-            displayImagePreview(imagePath);
+            displayImagePreview(selectedImagePath);
 
-            // Provide an option to download the image
-            provideDownloadLink(imagePath);
+            // Enable the download button
+            document.getElementById('downloadButton').disabled = false;
         }
     }
 
@@ -39,16 +41,15 @@
         imagePreviewContainer.appendChild(imageElement);
     }
 
-    function provideDownloadLink(imagePath) {
-        const downloadLinkContainer = document.getElementById('downloadLinkContainer');
-        downloadLinkContainer.innerHTML = '';
-
-        const downloadLink = document.createElement('a');
-        downloadLink.href = imagePath;
-        downloadLink.download = 'selected_image.png'; // You can customize the download filename
-        downloadLink.textContent = 'Download Image';
-
-        downloadLinkContainer.appendChild(downloadLink);
+    function downloadImage() {
+        if (selectedImagePath) {
+            const a = document.createElement('a');
+            a.href = selectedImagePath;
+            a.download = 'selected_image.png'; // You can customize the download filename
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
     }
 </script>
 
