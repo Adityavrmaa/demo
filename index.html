@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,18 +61,31 @@
     function handleImageSelection(event) {
         const fileInput = event.target;
         const selectedFile = fileInput.files[0];
+        var base64String;
+        console.log("selectedFile",selectedFile);
+        if (selectedFile){
+        
 
-        if (selectedFile) {
-            // Get the image source path
-            selectedImagePath = URL.createObjectURL(selectedFile);
 
-            // Display image preview
-            displayImagePreview(selectedImagePath);
-
-            // Enable the download button
-            document.getElementById('downloadButton').disabled = false;
+  var filereader = new FileReader();
+  filereader.readAsDataURL(selectedFile);
+  filereader.onload = function (evt) {
+     var base64 = evt.target.result;
+     displayImagePreview(base64);
+      return base64
+  }
+ 
+            
         }
+            
+        
+
+
+   // Enable the download button
+   document.getElementById('downloadButton').disabled = false;
     }
+
+
 
     function displayImagePreview(imagePath) {
         const imagePreviewContainer = document.getElementById('imagePreviewContainer');
