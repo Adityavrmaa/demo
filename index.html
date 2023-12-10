@@ -1,114 +1,115 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Handling</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 
 <style>
-    body{
+    body {
         display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
     }
-       #openCameraButton {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #4CAF50;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-        }
 
-        #cameraFileInput {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
+    #openCameraButton {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #4CAF50;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+    }
 
-        /* Optional: Style the input's label for better appearance */
-        #cameraFileInputLabel {
-            display: block;
-            text-align: center;
-            padding: 10px;
-        }
+    #cameraFileInput {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    /* Optional: Style the input's label for better appearance */
+    #cameraFileInputLabel {
+        display: block;
+        text-align: center;
+        padding: 10px;
+    }
 </style>
+
 <body>
+    <div class="">
+        <label for="cameraFileInput" id="openCameraButton">
+            <input id="cameraFileInput" type="file" accept="image/*" capture="environment" />
+            Open Camera
+        </label>
+        <div id="imagePreviewContainer"></div>
+        <button id="downloadButton" disabled>Upload Image</button>
+    </div>
 
-    <label for="cameraFileInput" id="openCameraButton">
-        <input id="cameraFileInput" type="file" accept="image/*" capture="environment" onchange="handleImageSelection(event)" />
-        Open Camera
-    </label>
-<!-- <input id="cameraFileInput" type="file" accept="image/*" capture="environment" onchange="handleImageSelection(event)" /> -->
-<div id="imagePreviewContainer"></div>
-<button id="downloadButton" onclick="downloadImage()" disabled>upload image</button>
+    <script>
+        $(document).ready(function () {
+            let selectedImagePath = '';
 
-<script>
-    let selectedImagePath = '';
+            $('#cameraFileInput').change(function (event) {
+                const fileInput = event.target;
+                const selectedFile = fileInput.files[0];
 
-    function handleImageSelection(event) {
-        const fileInput = event.target;
-        const selectedFile = fileInput.files[0];
-        var base64String;
-        console.log("selectedFile",selectedFile);
-        if (selectedFile){
-        
+                if (selectedFile) {
+                    const reader = new FileReader();
 
+                    reader.onload = function (e) {
+                        const base64 = e.target.result;
+                        displayImagePreview(base64);
+                        selectedImagePath = base64;
+                    };
 
-  var filereader = new FileReader();
-  filereader.readAsDataURL(selectedFile);
-  filereader.onload = function (evt) {
-     var base64 = evt.target.result;
-     displayImagePreview(base64);
-      return base64
-  }
- 
-            
-        }
-            
-        
+                    reader.readAsDataURL(selectedFile);
+                }
 
+                // Enable the download button
+                $('#downloadButton').prop('disabled', false);
+            });
 
-   // Enable the download button
-   document.getElementById('downloadButton').disabled = false;
-    }
+            function displayImagePreview(imagePath) {
+                const imagePreviewContainer = $('#imagePreviewContainer');
+                imagePreviewContainer.empty();
 
+                const imageElement = $('<img>', {
+                    src: imagePath,
+                    alt: 'Selected Image',
+                    style: 'max-width: 100%;'
+                });
 
+                imagePreviewContainer.append(imageElement);
+            }
 
-    function displayImagePreview(imagePath) {
-        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        imagePreviewContainer.innerHTML = '';
+            $('#downloadButton').click(function () {
+                if (selectedImagePath) {
+                    const a = $('<a>', {
+                        href: selectedImagePath,
+                        download: 'selected_image.png'
+                    });
 
-        const imageElement = document.createElement('img');
-        imageElement.src = imagePath;
-        imageElement.alt = 'Selected Image';
-        imageElement.style.maxWidth = '100%';
-        imagePreviewContainer.appendChild(imageElement);
-    }
-
-    function downloadImage() {
-        if (selectedImagePath) {
-            const a = document.createElement('a');
-            a.href = selectedImagePath;
-            a.download = 'selected_image.png'; // You can customize the download filename
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-    }
-</script>
+                    $('body').append(a);
+                    a[0].click();
+                    a.remove();
+                }
+            });
+        });
+    </script>
 
 </body>
+
 </html>
