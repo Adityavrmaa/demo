@@ -3,112 +3,71 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Handling</title>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <title>OCR using Javascript and appscript</title>
+    <script src='https://unpkg.com/tesseract.js@v2.0.0-alpha.13/dist/tesseract.min.js'></script>
+
+    <style>
+        .ocr {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .ocr * {
+            margin-top: 5px;
+        }
+
+        .text {
+            width: 80%;
+            height: 150px;
+        }
+    </style>
 </head>
 
-<style>
-    body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-    }
-
-    #openCameraButton {
-        position: relative;
-        overflow: hidden;
-        display: inline-block;
-        padding: 10px 20px;
-        font-size: 16px;
-        color: #fff;
-        background-color: #4CAF50;
-        cursor: pointer;
-        border: none;
-        border-radius: 5px;
-    }
-
-    #cameraFileInput {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-    /* Optional: Style the input's label for better appearance */
-    #cameraFileInputLabel {
-        display: block;
-        text-align: center;
-        padding: 10px;
-    }
-</style>
-
 <body>
-    <div class="">
-        <label for="cameraFileInput" id="openCameraButton">
-            <input id="cameraFileInput" type="file" accept="image/*" capture="environment" />
-            Open Camera
-        </label>
-        <div id="imagePreviewContainer"></div>
-        <button id="downloadButton" disabled>Upload Image</button>
+    <div class="ocr">
+        <h1>Image And PDF OCR Tool</h1>
+        <h2 class="message"></h2>
+        <span>Select a File</span>
+        <input type="file" class="file">
+        <button class="btn">Perform OCR</button>
+        <span>Result Text</span>
+        <textarea class="text"></textarea>
     </div>
-
     <script>
-        $(document).ready(function () {
-            let selectedImagePath = '';
-
-            $('#cameraFileInput').change(function (event) {
-                const fileInput = event.target;
-                const selectedFile = fileInput.files[0];
-
-                if (selectedFile) {
-                    const reader = new FileReader();
-
-                    reader.onload = function (e) {
-                        const base64 = e.target.result;
-                        displayImagePreview(base64);
-                        selectedImagePath = base64;
-                    };
-
-                    reader.readAsDataURL(selectedFile);
-                }
-
-                // Enable the download button
-                $('#downloadButton').prop('disabled', false);
-            });
-
-            function displayImagePreview(imagePath) {
-                const imagePreviewContainer = $('#imagePreviewContainer');
-                imagePreviewContainer.empty();
-
-                const imageElement = $('<img>', {
-                    src: imagePath,
-                    alt: 'Selected Image',
-                    style: 'max-width: 100%;'
-                });
-
-                imagePreviewContainer.append(imageElement);
-            }
-
-            $('#downloadButton').click(function () {
-                if (selectedImagePath) {
-                    const a = $('<a>', {
-                        href: selectedImagePath,
-                        download: 'selected_image.png'
+        let api ="https://script.google.com/macros/s/AKfycbyKyAPcZupSSYvjkwOQWYLsdCCnhLaxLf34Vr1ytJKhZyIb5GPZVVUe91G-MUJjp1-a6Q/exec"
+        let msg = document.querySelector(".message");
+        let file = document.querySelector(".file");
+        let btn = document.querySelector(".btn");
+        let text = document.querySelector(".text");
+        btn.addEventListener('click', () => {
+            msg.innerHTML = `Loading..`;
+            let fr = new FileReader();
+            fr.readAsDataURL(file.files[0])
+            fr.onload = () => {
+                let res = fr.result;
+                let b64 = res.split("base64,")[1];
+                fetch(api, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        file: b64,
+                        type: file.files[0].type,
+                        name: file.files[0].name
+                    })
+                })
+                    .then(res => res.text())
+                    .then(data => {
+                        text.innerHTML = data;
+                        msg.innerHTML = ``;
                     });
-
-                    $('body').append(a);
-                    a[0].click();
-                    a.remove();
-                }
-            });
-        });
+            }
+        })
     </script>
+
 
 </body>
 
