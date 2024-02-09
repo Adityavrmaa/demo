@@ -1,74 +1,26 @@
-
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Image Selection and Capture</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Upload</title>
 </head>
-
 <body>
-
-    <input id="imageInput" type="file" accept="image/*" capture="user">
-
-    <button onclick="handleButtonClick()">Select / Capture Image</button>
-
-    <img id="selectedImage" src="#" alt="Selected Image" style="display: none; max-width: 100%; height: auto;">
-
-    <script>
-
-        function handleButtonClick() {
-
-            const imageInput = document.getElementById('imageInput');
-
-            const selectedImage = document.getElementById('selectedImage');
-
-            // Trigger input click event to open file selection dialog or camera
-
-            imageInput.click();
-
-            // Listen for changes in the input
-
-            imageInput.addEventListener('change', function (event) {
-
-                const file = event.target.files[0];
-
-                const reader = new FileReader();
-
-                // Display selected image
-
-                reader.onload = function () {
-
-                    selectedImage.src = reader.result;
-
-                    selectedImage.style.display = 'block';
-
-                };
-
-                if (file) {
-
-                    // Read the selected file as a data URL
-
-                    reader.readAsDataURL(file);
-
-                    // Log the selected file in the console
-
-                    console.log(file);
-
-                }
-
-            });
-
-        }
-
-    </script>
-
+<input id="fileInput" type="file" style="display: none;">
+<button onclick="handleUpload()">Upload File</button>
+<script>
+       function handleUpload() {
+           const fileInput = document.getElementById('fileInput');
+           // Trigger input click event to open file selection dialog or camera
+           fileInput.click();
+           // Listen for changes in the input
+           fileInput.addEventListener('change', function(event) {
+               const file = event.target.files[0];
+               // Log the selected file object in the console
+               console.log(file);
+               // You can now use the 'file' object for further processing, such as uploading it to a server
+           });
+       }
+</script>
 </body>
-
 </html>
