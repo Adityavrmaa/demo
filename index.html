@@ -1,73 +1,73 @@
+
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCR using Javascript and appscript</title>
-    <script src='https://unpkg.com/tesseract.js@v2.0.0-alpha.13/dist/tesseract.min.js'></script>
 
-    <style>
-        .ocr {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
+    <title>Image Selection and Capture</title>
 
-        .ocr * {
-            margin-top: 5px;
-        }
-
-        .text {
-            width: 80%;
-            height: 150px;
-        }
-    </style>
 </head>
 
 <body>
-    <div class="ocr">
-        <h1>Image And PDF OCR Tool</h1>
-        <h2 class="message"></h2>
-        <span>Select a File</span>
-        <input type="file" class="file">
-        <button class="btn">Perform OCR</button>
-        <span>Result Text</span>
-        <textarea class="text"></textarea>
-    </div>
-    <script>
-        let api ="https://script.google.com/macros/s/AKfycbyKyAPcZupSSYvjkwOQWYLsdCCnhLaxLf34Vr1ytJKhZyIb5GPZVVUe91G-MUJjp1-a6Q/exec"
-        let msg = document.querySelector(".message");
-        let file = document.querySelector(".file");
-        let btn = document.querySelector(".btn");
-        let text = document.querySelector(".text");
-        btn.addEventListener('click', () => {
-            msg.innerHTML = `Loading..`;
-            let fr = new FileReader();
-            fr.readAsDataURL(file.files[0])
-            fr.onload = () => {
-                let res = fr.result;
-                let b64 = res.split("base64,")[1];
-                fetch(api, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        file: b64,
-                        type: file.files[0].type,
-                        name: file.files[0].name
-                    })
-                })
-                    .then(res => res.text())
-                    .then(data => {
-                        text.innerHTML = data;
-                        msg.innerHTML = ``;
-                    });
-            }
-        })
-    </script>
 
+    <input id="imageInput" type="file" accept="image/*" capture="user">
+
+    <button onclick="handleButtonClick()">Select / Capture Image</button>
+
+    <img id="selectedImage" src="#" alt="Selected Image" style="display: none; max-width: 100%; height: auto;">
+
+    <script>
+
+        function handleButtonClick() {
+
+            const imageInput = document.getElementById('imageInput');
+
+            const selectedImage = document.getElementById('selectedImage');
+
+            // Trigger input click event to open file selection dialog or camera
+
+            imageInput.click();
+
+            // Listen for changes in the input
+
+            imageInput.addEventListener('change', function (event) {
+
+                const file = event.target.files[0];
+
+                const reader = new FileReader();
+
+                // Display selected image
+
+                reader.onload = function () {
+
+                    selectedImage.src = reader.result;
+
+                    selectedImage.style.display = 'block';
+
+                };
+
+                if (file) {
+
+                    // Read the selected file as a data URL
+
+                    reader.readAsDataURL(file);
+
+                    // Log the selected file in the console
+
+                    console.log(file);
+
+                }
+
+            });
+
+        }
+
+    </script>
 
 </body>
 
